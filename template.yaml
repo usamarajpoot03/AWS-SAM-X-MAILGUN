@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: hook to receive mail-gun notifications, store them in dynamo db & notify through SNS
+
+Globals:
+  Function:
+    Timeout: 10
+    Environment:
+      Variables:
+        EVENTS_TABLE_NAME: mailgunEvents
+        MAILGUN_API_KEY: <mailgun-api-key>
+
+Resources:
+  MailgunHook:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: mailgun-hook/
+      Handler: app.lambdaHandler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /mailgun-hook
+            Method: POST
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MailgunEventsTable
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt MailGunEventNotification.TopicName
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref MailGunEventNotification
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints: 
+        - app.ts
+  MailgunEventsTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: mailgunEvents
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  MailGunEventNotification:
+    Type: AWS::SNS::Topic
+
+Outputs:
+  MailgunHookApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/mailgun-hook/"
