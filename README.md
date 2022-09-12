@@ -1,5 +1,6 @@
-# AWS-SAM-X-MAILGUN
+# AWS-SAM-WITH-MAILGUN-HOOK
 
-
-
-# AWS-SAM-X-MAILGUN
+##AWS SAM
+### MAILGUN -> Lambda
+### Lambda -> DynamoDB
+### Lambda -> SNS
