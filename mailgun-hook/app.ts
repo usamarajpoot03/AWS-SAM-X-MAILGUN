@@ -17,7 +17,6 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
     let response: APIGatewayProxyResult;
 
     try {
-        console.log('process.env.MAILGUN_API_KEY', process.env.MAILGUN_API_KEY);
         console.log('process.env.AWS_SAM_LOCAL', process.env.AWS_SAM_LOCAL);
         console.log('process.env.EVENTS_TABLE_NAME', process.env.EVENTS_TABLE_NAME);
         console.log('process.env.SNS_TOPIC_ARN', process.env.SNS_TOPIC_ARN);
