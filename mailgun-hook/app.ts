@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { saveEvent } from './services/databaseManager';
 import { publishToSNS } from './services/notificationManager';
-import { MailgunEvent } from './types';
+import { EventNotification, MailgunEvent } from './types';
 import { verifySignature } from './utils';
 /**
  *
@@ -12,6 +12,8 @@ import { verifySignature } from './utils';
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
+
+const PROVIDER = "Mailgun";
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let response: APIGatewayProxyResult;
@@ -40,7 +42,13 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
 
         if (!verifySignature(mailgunEvent.signature)) throw 'invalid token';
         await saveEvent(JSON.stringify(rawEvent));
-        await publishToSNS(mailgunEvent['event-data']);
+
+        const notification: EventNotification = {
+            Provider: PROVIDER,
+            timestamp: mailgunEvent['event-data'].timestamp,
+            type: mailgunEvent['event-data'].event
+        }
+        await publishToSNS(notification);
         response = {
             statusCode: 200,
             body: JSON.stringify({

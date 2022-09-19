@@ -14,3 +14,9 @@ export interface MailgunEvent {
     signature: Signature;
     'event-data': EventData;
 }
+
+export interface EventNotification {
+    Provider: string;
+    timestamp: number;
+    type: string;
+} 

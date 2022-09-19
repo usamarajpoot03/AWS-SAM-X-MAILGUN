@@ -1,16 +1,12 @@
 import AWS from 'aws-sdk';
-import { EventData } from '../types';
+import { EventNotification } from '../types';
 const sns = new AWS.SNS();
 
 const SNS_TOPIC_ARN = process.env.SNS_TOPIC_ARN || '';
 
-export const publishToSNS = async (eventData: EventData) => {
+export const publishToSNS = async (notification: EventNotification) => {
     const params = {
-        Message: JSON.stringify({
-            id: eventData.id,
-            timestamp: eventData.timestamp,
-            event: eventData.event,
-        }),
+        Message: JSON.stringify(notification),
         Subject: 'Mailgun Event',
         TopicArn: SNS_TOPIC_ARN,
     };
